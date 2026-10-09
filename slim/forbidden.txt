@@ -1,0 +1,4 @@
+gvisor.dev/gvisor
+golang.zx2c4.com/wireguard
+github.com/vishvananda/netlink
+net/http/pprof

@@ -1,0 +1,25 @@
+name: update
+
+on:
+  schedule:
+    - cron: '23 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Build a new upstream release
+        run: |
+          latest=$(gh api repos/2dust/AndroidLibXrayLite/releases/latest --jq .tag_name)
+          if gh release view "$latest-slim" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Up to date: $latest"
+            exit 0
+          fi
+          gh workflow run build.yml --repo "$GITHUB_REPOSITORY" -f tag="$latest"

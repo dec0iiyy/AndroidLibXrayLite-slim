@@ -1,0 +1,82 @@
+name: build
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: AndroidLibXrayLite tag to build, for example v26.9.30
+        required: true
+      xray:
+        description: Optional Xray-core tag to use instead of the one pinned by that tag, for example v26.10.1
+        required: false
+        default: ''
+      publish:
+        description: Publish a GitHub release
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: build-${{ inputs.tag }}-${{ inputs.xray }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+      XRAY: ${{ inputs.xray }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Clone upstream
+        run: git clone --depth 1 --branch "$TAG" https://github.com/2dust/AndroidLibXrayLite upstream/AndroidLibXrayLite
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: upstream/AndroidLibXrayLite/go.mod
+
+      - uses: android-actions/setup-android@v4
+        with:
+          log-accepted-android-sdk-licenses: false
+          packages: ''
+
+      - name: Install the NDK
+        run: |
+          echo "y" | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --channel=0 --install "ndk;29.0.14206865"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/29.0.14206865" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: ./build-aar.sh "$TAG" "$XRAY"
+        env:
+          LIBV2RAY_SRC: ${{ github.workspace }}/upstream/AndroidLibXrayLite
+          LIBV2RAY_WORK: ${{ runner.temp }}/libv2ray-build
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: libv2ray-slim
+          path: dist/*
+
+      - name: Publish the release
+        if: inputs.publish
+        run: |
+          aar=$(ls dist/libv2ray-*-slim.aar)
+          version=${aar##*libv2ray-}
+          version=${version%.aar}
+          if gh release view "v$version" > /dev/null 2>&1; then
+            echo "Release v$version already exists" >&2
+            exit 1
+          fi
+          gh release create "v$version" dist/* --title "$version" --notes-file dist/RELEASE_NOTES.md
+
+      - name: Open an issue when the build fails
+        if: failure() && inputs.publish
+        run: |
+          title="Build failed for $TAG ${XRAY:+with Xray-core $XRAY}"
+          if [ -z "$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number')" ]; then
+            gh issue create --title "$title" --body "The build did not finish: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi
