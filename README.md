@@ -59,7 +59,7 @@ Keep rules ship inside the AAR (`-keep class go.** { *; }`, `-keep class libv2ra
 
 ## Verify what you download
 
-Every release has a `SHA256SUMS` file and its release notes contain the SHA-256 of the AAR. Releases built by the `build` workflow also carry a signed build provenance attestation (Sigstore), which ties the file to the workflow run and the commit that produced it:
+Every release has a `SHA256SUMS` file and its release notes contain the SHA-256 of the AAR. Every release is built by the `build` workflow and carries a signed build provenance attestation (Sigstore), which ties the file to the workflow run and the commit that produced it:
 
 ```sh
 gh attestation verify libv2ray-<version>-slim.aar --repo dec0iiyy/AndroidLibXrayLite-slim
@@ -71,12 +71,10 @@ To pin the AAR in your own build, add it to `gradle/verification-metadata.xml` (
 ```xml
 <component group="io.github.dec0iiyy" name="libv2ray" version="26.9.30-slim">
    <artifact name="libv2ray-26.9.30-slim.aar">
-      <sha256 value="04a1eb09f9cf518a44c0863116835fd27cc06b6e770efbb5a9c03fefb1d2bcd3" origin="GitHub release"/>
+      <sha256 value="8f0d763a0f90dbb0c20d26e6278ed5629f33e00644cd8e3180b8aa0684a62410" origin="GitHub release"/>
    </artifact>
 </component>
 ```
-
-`26.9.30-slim` itself was built on a developer machine with this script and the pinned toolchain before the pipeline existed, so it has a checksum but no attestation. Later releases are built by CI.
 
 ## Updating Xray
 
