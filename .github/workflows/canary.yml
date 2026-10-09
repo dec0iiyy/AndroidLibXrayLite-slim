@@ -1,0 +1,44 @@
+name: canary
+
+on:
+  schedule:
+    - cron: '41 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  attestations: write
+  id-token: write
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      wrapper: ${{ steps.latest.outputs.wrapper }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - id: latest
+        run: echo "wrapper=$(gh api repos/2dust/AndroidLibXrayLite/releases/latest --jq .tag_name)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: resolve
+    uses: ./.github/workflows/build.yml
+    with:
+      tag: ${{ needs.resolve.outputs.wrapper }}
+      xray: main
+      publish: false
+
+  report:
+    needs: build
+    if: failure()
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - run: |
+          title="Canary failed: the latest wrapper with Xray-core main"
+          if [ -z "$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[0].number')" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "The weekly canary build did not finish, so the next Xray-core release may need a change in slim/: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi
