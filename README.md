@@ -4,7 +4,7 @@
 
 # AndroidLibXrayLite · slim
 
-**Xray-core for Android, <!-- release:percent -->21–22%<!-- /release:percent --> smaller once compressed.**<br>
+**Xray-core for Android, <!-- release:percent -->20–22%<!-- /release:percent --> smaller once compressed.**<br>
 An unofficial build of `libv2ray` without TUN, WireGuard and MASQUE. Same Java API, built and attested by CI, updated automatically.
 
 [![Release](https://img.shields.io/github/v/release/dec0iiyy/AndroidLibXrayLite-slim?style=flat-square&color=2ea043)](https://github.com/dec0iiyy/AndroidLibXrayLite-slim/releases/latest)
@@ -47,12 +47,12 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("io.github.dec0iiyy:libv2ray:26.10.10-slim@aar")
+    implementation("io.github.dec0iiyy:libv2ray:26.10.10-r1-slim@aar")
 }
 ```
 <!-- /release:gradle -->
 
-Prefer a file? Download <!-- release:file -->`libv2ray-26.10.10-slim.aar`<!-- /release:file --> from the [releases](https://github.com/dec0iiyy/AndroidLibXrayLite-slim/releases) page. `SHA256SUMS` is attached to every release, and the keep rules ship inside the AAR (`-keep class go.** { *; }`, `-keep class libv2ray.** { *; }`).
+Prefer a file? Download <!-- release:file -->`libv2ray-26.10.10-r1-slim.aar`<!-- /release:file --> from the [releases](https://github.com/dec0iiyy/AndroidLibXrayLite-slim/releases) page. `SHA256SUMS` is attached to every release, and the keep rules ship inside the AAR (`-keep class go.** { *; }`, `-keep class libv2ray.** { *; }`).
 
 ## Sizes
 
@@ -64,15 +64,15 @@ Prefer a file? Download <!-- release:file -->`libv2ray-26.10.10-slim.aar`<!-- /r
 </p>
 
 <!-- release:sizes -->
-`libgojni.so` per ABI, upstream `v26.10.10` against `26.10.10-slim`. "Compressed" is the deflated size of the file inside the AAR, which is roughly what an APK download carries.
+`libgojni.so` per ABI, upstream `v26.10.10` against `26.10.10-r1-slim`. "Compressed" is the deflated size of the file inside the AAR, which is roughly what an APK download carries.
 
 | ABI | upstream | slim | upstream, compressed | slim, compressed |
 |---|---|---|---|---|
-| arm64-v8a | 37.3 MB | 26.8 MB | 13.5 MB | 10.5 MB |
-| armeabi-v7a | 36.2 MB | 28.0 MB | 14.0 MB | 11.1 MB |
-| x86_64 | 39.8 MB | 28.9 MB | 14.5 MB | 11.4 MB |
+| arm64-v8a | 37.3 MB | 26.9 MB | 13.5 MB | 10.6 MB |
+| armeabi-v7a | 36.2 MB | 28.1 MB | 14.0 MB | 11.2 MB |
+| x86_64 | 39.8 MB | 29.1 MB | 14.5 MB | 11.4 MB |
 
-The AAR files are 64.9 MB (upstream) and 33.0 MB (slim), but that is not a like-for-like comparison. The upstream AAR also contains an x86 library (15.0 MB compressed) and `geoip.dat` / `geosite.dat` (27.9 MB, 7.9 MB compressed). **The slim AAR contains neither**: ship your own geo files if your config uses them.
+The AAR files are 64.9 MB (upstream) and 33.2 MB (slim), but that is not a like-for-like comparison. The upstream AAR also contains an x86 library (15.0 MB compressed) and `geoip.dat` / `geosite.dat` (27.9 MB, 7.9 MB compressed). **The slim AAR contains neither**: ship your own geo files if your config uses them.
 <!-- /release:sizes -->
 
 These numbers belong to one release. The notes of every release give the exact size of the arm64-v8a library and the change since the previous release.
@@ -121,9 +121,9 @@ Add it to `gradle/verification-metadata.xml` (`./gradlew --write-verification-me
 
 <!-- release:verification -->
 ```xml
-<component group="io.github.dec0iiyy" name="libv2ray" version="26.10.10-slim">
-   <artifact name="libv2ray-26.10.10-slim.aar">
-      <sha256 value="431356f0ce85b8562b7d269aead7e35ddccd6bfd241a8f7c75d5c6685b6c0767" origin="GitHub release"/>
+<component group="io.github.dec0iiyy" name="libv2ray" version="26.10.10-r1-slim">
+   <artifact name="libv2ray-26.10.10-r1-slim.aar">
+      <sha256 value="0245f38ae9e7c7a8a7eb1496b5f8a09cfbcade8b97eb988f5059f35171647fb9" origin="GitHub release"/>
    </artifact>
 </component>
 ```
