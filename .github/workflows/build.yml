@@ -119,6 +119,48 @@ jobs:
           gh release create "v$version" "$aar" "dist/libv2ray-$version.pom" dist/SHA256SUMS dist/THIRD_PARTY_LICENSES.txt \
             --title "$version" --notes-file dist/RELEASE_NOTES.md
 
+      - name: Update the README
+        id: readme
+        continue-on-error: true
+        env:
+          PUBLISH: ${{ inputs.publish }}
+          UPSTREAM_DIR: ${{ runner.temp }}/upstream-aar
+        run: |
+          gh release download "$TAG" --repo 2dust/AndroidLibXrayLite --pattern libv2ray.aar --dir "$UPSTREAM_DIR"
+          go run tools/readme/main.go -upstream "$UPSTREAM_DIR/libv2ray.aar"
+          if [ -z "$(git status --porcelain -- README.md docs)" ]; then
+            exit 0
+          fi
+          git --no-pager diff --stat -- README.md docs
+          git --no-pager diff -- README.md | head -n 120
+          latest=$(gh api repos/2dust/AndroidLibXrayLite/releases/latest --jq .tag_name)
+          if [ "$PUBLISH" != true ] || [ -n "$XRAY" ] || [ "$latest" != "$TAG" ]; then
+            echo "Not committing the README: publish=$PUBLISH, xray='$XRAY', latest upstream=$latest, built=$TAG"
+            exit 0
+          fi
+          aar=$(ls dist/libv2ray-*-slim.aar)
+          version=${aar##*libv2ray-}
+          version=${version%.aar}
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md docs
+          git commit -m "Update the README for $version"
+          for _ in 1 2 3; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
+
+      - name: Open an issue when the README update fails
+        if: steps.readme.outcome == 'failure' && inputs.publish
+        run: |
+          title="README update failed for $TAG"
+          if [ -z "$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number')" ]; then
+            gh issue create --title "$title" --body "The release was published, but tools/readme could not update the README: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi
+
       - name: Open an issue when the build fails
         if: failure() && inputs.publish
         run: |
