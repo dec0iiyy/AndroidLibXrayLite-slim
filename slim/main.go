@@ -49,6 +49,7 @@ type symbol struct {
 type slim struct {
 	src, config, copyDir string
 	xrayDir              string
+	tags                 string
 	hidden               map[string]bool
 	index                map[string][]symbol
 }
@@ -57,12 +58,13 @@ func main() {
 	src := flag.String("src", "", "libv2ray checkout (a Go module that requires xray-core)")
 	config := flag.String("config", "", "directory with hollow.txt, forbidden.txt and distro_all.go.txt")
 	out := flag.String("xray", "", "directory to write the patched copy of xray-core to")
+	tags := flag.String("tags", "grpcnotrace", "Go build tags of the real build, so that the check compiles the same files")
 	flag.Parse()
 	if *src == "" || *config == "" || *out == "" {
 		flag.Usage()
 		os.Exit(2)
 	}
-	s := &slim{src: abs(*src), config: abs(*config), copyDir: abs(*out), hidden: map[string]bool{}, index: map[string][]symbol{}}
+	s := &slim{src: abs(*src), config: abs(*config), copyDir: abs(*out), tags: *tags, hidden: map[string]bool{}, index: map[string][]symbol{}}
 	if err := s.run(); err != nil {
 		fmt.Fprintln(os.Stderr, "slim:", err)
 		os.Exit(1)
@@ -214,7 +216,7 @@ func (s *slim) goOutput(extraEnv []string, args ...string) (string, error) {
 }
 
 func (s *slim) build() (string, error) {
-	args := append([]string{"build", "-tags=grpcnotrace", "-o", os.DevNull}, buildTargets...)
+	args := append([]string{"build", "-tags=" + s.tags, "-o", os.DevNull}, buildTargets...)
 	return s.goOutput([]string{"GOOS=linux", "GOARCH=arm64", "CGO_ENABLED=0"}, args...)
 }
 
@@ -264,7 +266,7 @@ func (s *slim) finish(restored map[string]bool) error {
 	if err != nil {
 		return err
 	}
-	args := append([]string{"list", "-tags=grpcnotrace", "-deps", "-f", "{{.ImportPath}} {{join .Imports \" \"}}"}, buildTargets...)
+	args := append([]string{"list", "-tags=" + s.tags, "-deps", "-f", "{{.ImportPath}} {{join .Imports \" \"}}"}, buildTargets...)
 	listing, err := s.goOutput([]string{"GOOS=linux", "GOARCH=arm64", "CGO_ENABLED=0"}, args...)
 	if err != nil {
 		return fmt.Errorf("go list failed:\n%s", listing)

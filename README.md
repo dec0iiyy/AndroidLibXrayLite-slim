@@ -97,7 +97,11 @@ These numbers belong to one release. The notes of every release give the exact s
 <details>
 <summary>Build flags</summary>
 
-`-trimpath -tags grpcnotrace -ldflags='-s -w -buildid= -checklinkname=0 -extldflags=-Wl,--pack-dyn-relocs=android'`. Packed relocations need Android 6.0 (API 23) or newer.
+`-trimpath -tags grpcnotrace,http2legacy -ldflags='-s -w -buildid= -checklinkname=0 -extldflags=-Wl,--pack-dyn-relocs=android'`. Packed relocations need Android 6.0 (API 23) or newer.
+
+`http2legacy` keeps the HTTP/2 client of `golang.org/x/net`. Built with Go 1.27, the default client hands requests to `net/http`, which dials a new connection for every request that waits for a TLS handshake. When a censor stalls the handshake, XHTTP's `xmux.maxConnections` stops limiting anything and a client opens a connection per session ([XTLS/Xray-core#6797](https://github.com/XTLS/Xray-core/issues/6797)). The tags live in `versions.env`.
+
+A rebuild of a version that is already released gets a revision, for example `26.10.10-r1-slim`.
 
 </details>
 

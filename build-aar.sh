@@ -12,7 +12,7 @@ SRC=${LIBV2RAY_SRC:-$WORK/AndroidLibXrayLite}
 OUT=${LIBV2RAY_OUT:-$HERE/dist}
 MAX_ARM64_BYTES=${MAX_ARM64_BYTES:-30000000}
 VERSION=${XRAY_REF:-$TAG}
-VERSION=${VERSION#v}-slim
+VERSION=${VERSION#v}${LIBV2RAY_REVISION:+-r$LIBV2RAY_REVISION}-slim
 TARGETS=android/arm64,android/arm,android/amd64
 LDFLAGS='-s -w -buildid= -checklinkname=0 -extldflags=-Wl,--pack-dyn-relocs=android'
 export GOFLAGS=-modcacherw
@@ -62,14 +62,14 @@ GOBIN=$WORK/bin "$GO" install "golang.org/x/mobile/cmd/gomobile@$GOMOBILE" "gola
 PATH=$WORK/bin:$PATH
 gomobile init
 
-"$GO" run "$HERE/slim/main.go" -src "$SRC" -config "$HERE/slim" -xray "$WORK/xray-core"
+"$GO" run "$HERE/slim/main.go" -src "$SRC" -config "$HERE/slim" -xray "$WORK/xray-core" -tags "$GO_TAGS"
 
 mkdir -p "$SRC/verify"
 cp "$HERE/verify/main.go" "$SRC/verify/main.go"
 GOFLAGS="$GOFLAGS -mod=mod" "$GO" run ./verify | tee "$WORK/verify.log"
 XRAY_RELEASE=$(sed -n 's/^xray-core //p' "$WORK/verify.log")
 
-gomobile bind -target="$TARGETS" -androidapi 24 -trimpath -tags grpcnotrace -ldflags="$LDFLAGS" -o "$WORK/libv2ray.aar" ./
+gomobile bind -target="$TARGETS" -androidapi 24 -trimpath -tags "$GO_TAGS" -ldflags="$LDFLAGS" -o "$WORK/libv2ray.aar" ./
 
 for abi in arm64-v8a armeabi-v7a x86_64; do
     unzip -l "$WORK/libv2ray.aar" | grep -q "jni/$abi/libgojni.so" || { printf 'libv2ray: no %s in the AAR\n' "$abi" >&2; exit 1; }
@@ -114,6 +114,7 @@ SIZES=$("$GO" run "$HERE/tools/sizes/main.go" -top 12 "$WORK/libgojni-arm64.so")
 {
     printf 'Xray-core %s (%s), wrapper `%s`, built with %s and NDK %s.\n\n' "$XRAY_RELEASE" "$XRAY_MODULE" "$TAG" "$GO_VERSION_FOUND" "$NDK_REVISION"
     printf '`libgojni.so` (arm64-v8a): %s bytes. ABIs: arm64-v8a, armeabi-v7a, x86_64. `minSdk` 24.\n\n' "$ARM64_BYTES"
+    printf 'Go build tags: `%s`.\n\n' "$GO_TAGS"
     printf 'Gradle: `implementation("io.github.dec0iiyy:libv2ray:%s@aar")`, see the README for the repository snippet.\n\n' "$VERSION"
     printf '### Verify the download\n\n'
     printf 'SHA-256 of the AAR:\n\n```\n%s  libv2ray-%s.aar\n```\n\n' "$AAR_SHA" "$VERSION"

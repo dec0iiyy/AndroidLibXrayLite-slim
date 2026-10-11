@@ -14,6 +14,10 @@ on:
         type: boolean
         required: false
         default: true
+      revision:
+        type: string
+        required: false
+        default: ''
   workflow_dispatch:
     inputs:
       tag:
@@ -27,6 +31,10 @@ on:
         description: Publish a GitHub release
         type: boolean
         default: true
+      revision:
+        description: Optional rebuild number for a version that is already released, for example 1 publishes 26.10.10-r1-slim
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -35,7 +43,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: build-${{ inputs.tag }}-${{ inputs.xray }}
+  group: build-${{ inputs.tag }}-${{ inputs.xray }}-${{ inputs.revision }}
 
 jobs:
   build:
@@ -82,6 +90,7 @@ jobs:
         env:
           LIBV2RAY_SRC: ${{ github.workspace }}/upstream/AndroidLibXrayLite
           LIBV2RAY_WORK: ${{ runner.temp }}/libv2ray-build
+          LIBV2RAY_REVISION: ${{ inputs.revision }}
 
       - name: Compare the size with the previous release
         run: |
@@ -103,7 +112,7 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: libv2ray-slim-${{ inputs.xray || inputs.tag }}
+          name: libv2ray-slim-${{ inputs.xray || inputs.tag }}${{ inputs.revision && format('-r{0}', inputs.revision) || '' }}
           path: dist/*
 
       - name: Publish the release

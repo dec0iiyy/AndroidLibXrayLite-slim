@@ -2,11 +2,13 @@
 set -eu
 
 SRC=${1:?libv2ray checkout}
+HERE=$(cd "$(dirname "$0")" && pwd)
+. "$HERE/versions.env"
 GO=${GO:-go}
 RULE='================================================================================'
 
 cd "$SRC"
-GOOS=android GOARCH=arm64 CGO_ENABLED=1 "$GO" list -tags grpcnotrace -deps \
+GOOS=android GOARCH=arm64 CGO_ENABLED=1 "$GO" list -tags "$GO_TAGS" -deps \
     -f '{{with .Module}}{{if not .Main}}{{.Path}} {{.Version}} {{.Dir}}{{end}}{{end}}' ./ |
     sort -u |
     while read -r path version dir; do
