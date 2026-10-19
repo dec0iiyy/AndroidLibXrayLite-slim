@@ -4,7 +4,7 @@
 
 # AndroidLibXrayLite · slim
 
-**Xray-core for Android, <!-- release:percent -->20–22%<!-- /release:percent --> smaller once compressed.**<br>
+**Xray-core for Android, <!-- release:percent -->12–14%<!-- /release:percent --> smaller once compressed.**<br>
 An unofficial build of `libv2ray` without TUN, WireGuard and MASQUE. Same Java API, built and attested by CI, updated automatically.
 
 [![Release](https://img.shields.io/github/v/release/dec0iiyy/AndroidLibXrayLite-slim?style=flat-square&color=2ea043)](https://github.com/dec0iiyy/AndroidLibXrayLite-slim/releases/latest)
@@ -47,12 +47,12 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("io.github.dec0iiyy:libv2ray:26.10.10-r1-slim@aar")
+    implementation("io.github.dec0iiyy:libv2ray:26.10.17-slim@aar")
 }
 ```
 <!-- /release:gradle -->
 
-Prefer a file? Download <!-- release:file -->`libv2ray-26.10.10-r1-slim.aar`<!-- /release:file --> from the [releases](https://github.com/dec0iiyy/AndroidLibXrayLite-slim/releases) page. `SHA256SUMS` is attached to every release, and the keep rules ship inside the AAR (`-keep class go.** { *; }`, `-keep class libv2ray.** { *; }`).
+Prefer a file? Download <!-- release:file -->`libv2ray-26.10.17-slim.aar`<!-- /release:file --> from the [releases](https://github.com/dec0iiyy/AndroidLibXrayLite-slim/releases) page. `SHA256SUMS` is attached to every release, and the keep rules ship inside the AAR (`-keep class go.** { *; }`, `-keep class libv2ray.** { *; }`).
 
 ## Sizes
 
@@ -64,15 +64,15 @@ Prefer a file? Download <!-- release:file -->`libv2ray-26.10.10-r1-slim.aar`<!--
 </p>
 
 <!-- release:sizes -->
-`libgojni.so` per ABI, upstream `v26.10.10` against `26.10.10-r1-slim`. "Compressed" is the deflated size of the file inside the AAR, which is roughly what an APK download carries.
+`libgojni.so` per ABI, upstream `v26.10.17` against `26.10.17-slim`. "Compressed" is the deflated size of the file inside the AAR, which is roughly what an APK download carries.
 
 | ABI | upstream | slim | upstream, compressed | slim, compressed |
 |---|---|---|---|---|
-| arm64-v8a | 37.3 MB | 26.9 MB | 13.5 MB | 10.6 MB |
-| armeabi-v7a | 36.2 MB | 28.1 MB | 14.0 MB | 11.2 MB |
-| x86_64 | 39.8 MB | 29.1 MB | 14.5 MB | 11.4 MB |
+| arm64-v8a | 33.4 MB | 27.0 MB | 12.2 MB | 10.5 MB |
+| armeabi-v7a | 32.7 MB | 28.1 MB | 12.8 MB | 11.2 MB |
+| x86_64 | 35.7 MB | 29.0 MB | 13.2 MB | 11.4 MB |
 
-The AAR files are 64.9 MB (upstream) and 33.2 MB (slim), but that is not a like-for-like comparison. The upstream AAR also contains an x86 library (15.0 MB compressed) and `geoip.dat` / `geosite.dat` (27.9 MB, 7.9 MB compressed). **The slim AAR contains neither**: ship your own geo files if your config uses them.
+The AAR files are 59.8 MB (upstream) and 33.2 MB (slim), but that is not a like-for-like comparison. The upstream AAR also contains an x86 library (13.7 MB compressed) and `geoip.dat` / `geosite.dat` (27.9 MB, 7.9 MB compressed). **The slim AAR contains neither**: ship your own geo files if your config uses them.
 <!-- /release:sizes -->
 
 These numbers belong to one release. The notes of every release give the exact size of the arm64-v8a library and the change since the previous release.
@@ -81,7 +81,7 @@ These numbers belong to one release. The notes of every release give the exact s
 
 | Property | Value |
 |---|---|
-| **Xray‑core** | <!-- release:xray -->26.10.10<!-- /release:xray --> |
+| **Xray‑core** | <!-- release:xray -->26.10.17<!-- /release:xray --> |
 | **Toolchain** | Go <!-- release:go -->1.27.1<!-- /release:go -->, `gomobile bind -androidapi 24` |
 | **ABIs** | `arm64-v8a`, `armeabi-v7a`, `x86_64` (no 32-bit `x86`). The arm64 and x86_64 libraries are 16 KB page aligned |
 | **minSdk** | 24 |
@@ -121,9 +121,9 @@ Add it to `gradle/verification-metadata.xml` (`./gradlew --write-verification-me
 
 <!-- release:verification -->
 ```xml
-<component group="io.github.dec0iiyy" name="libv2ray" version="26.10.10-r1-slim">
-   <artifact name="libv2ray-26.10.10-r1-slim.aar">
-      <sha256 value="0245f38ae9e7c7a8a7eb1496b5f8a09cfbcade8b97eb988f5059f35171647fb9" origin="GitHub release"/>
+<component group="io.github.dec0iiyy" name="libv2ray" version="26.10.17-slim">
+   <artifact name="libv2ray-26.10.17-slim.aar">
+      <sha256 value="38a515c41be0a5607ed009200816ecafdfea52c1486c2b0604858cb89ad2332f" origin="GitHub release"/>
    </artifact>
 </component>
 ```
@@ -148,7 +148,7 @@ flowchart LR
 - **Automatic.** The `update` workflow runs daily, looks at the latest AndroidLibXrayLite release and, if there is no matching `-slim` release here, starts the `build` workflow. It builds, runs the tests, attests and publishes the release with checksums, licenses and a size report, then updates the numbers and the chart in this README, and opens an issue if something fails. GitHub can start scheduled runs hours late.
 - **Canary.** The `canary` workflow runs every Monday and builds the latest wrapper against Xray-core `main` without publishing. If it fails, an issue appears before the next Xray release does, saying that `slim/` needs a change.
 - **On demand.** Actions → `build` → Run workflow. `tag` is an AndroidLibXrayLite tag. `xray` is optional: an Xray-core tag, branch or commit (for example `v26.10.1` or `main`) to build into that wrapper before the wrapper itself is updated. Untick `publish` for a dry run that only uploads the files as a workflow artifact.
-- **Locally.** <!-- release:local -->`./build-aar.sh v26.10.10` or `./build-aar.sh v26.10.10 main`<!-- /release:local -->.
+- **Locally.** <!-- release:local -->`./build-aar.sh v26.10.17` or `./build-aar.sh v26.10.17 main`<!-- /release:local -->.
 
 The toolchain is pinned in `versions.env` (Go and NDK), so a new release does not change because a runner image did. If an upstream release needs a newer Go, the build stops with a message that says so; raise `GO_VERSION` in a commit and run it again.
 
@@ -173,7 +173,7 @@ You need git, Go and an Android NDK in the versions pinned in `versions.env` (ot
 
 <!-- release:build -->
 ```sh
-ANDROID_NDK_HOME=$ANDROID_HOME/ndk/30.0.16248370 ./build-aar.sh v26.10.10
+ANDROID_NDK_HOME=$ANDROID_HOME/ndk/30.0.16248370 ./build-aar.sh v26.10.17
 ```
 <!-- /release:build -->
 
