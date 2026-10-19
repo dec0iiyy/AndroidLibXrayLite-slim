@@ -1,5 +1,4 @@
 proxy/tun
-proxy/tun/icmp
 proxy/wireguard
 proxy/masque
 transport/internet/masque

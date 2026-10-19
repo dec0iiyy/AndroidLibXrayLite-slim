@@ -8,6 +8,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"go/ast"
@@ -143,6 +144,10 @@ func (s *slim) hideHollowPackages() error {
 	for _, line := range strings.Fields(string(list)) {
 		dir := filepath.Join(s.xrayDir, filepath.FromSlash(line))
 		files, err := goFiles(dir)
+		if errors.Is(err, fs.ErrNotExist) {
+			fmt.Printf("slim: hollow package %s is gone from Xray-core, skipping it\n", line)
+			continue
+		}
 		if err != nil {
 			return fmt.Errorf("hollow package %s: %w", line, err)
 		}
