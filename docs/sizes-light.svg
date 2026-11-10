@@ -1,23 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="760" height="308" viewBox="0 0 760 308" role="img" aria-labelledby="title desc" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif">
 <title id="title">Native library per ABI, compressed</title>
-<desc id="desc">Compressed libgojni.so per ABI, upstream v26.10.31 against slim 26.10.31-slim. Smaller is better.</desc>
+<desc id="desc">Compressed libgojni.so per ABI, upstream v26.11.9 against slim 26.11.9-slim. Smaller is better.</desc>
 <text x="24" y="36" font-size="18" font-weight="600" fill="#1f2328">Native library per ABI, compressed</text>
-<text x="24" y="58" font-size="13" fill="#656d76">upstream v26.10.31 against slim 26.10.31-slim, smaller is better</text>
+<text x="24" y="58" font-size="13" fill="#656d76">upstream v26.11.9 against slim 26.11.9-slim, smaller is better</text>
 <text x="24" y="114" font-size="14" font-weight="600" fill="#1f2328">arm64-v8a</text>
-<rect x="132" y="92" width="433.4" height="18" rx="4" fill="#afb8c1"/>
-<text x="573.4" y="105" font-size="13" fill="#656d76">12.2 MB</text>
-<rect x="132" y="116" width="378.8" height="18" rx="4" fill="#1a7f37"/>
-<text x="518.8" y="129" font-size="13" font-weight="600" fill="#1f2328">10.7 MB  <tspan fill="#1a7f37">−13%</tspan></text>
+<rect x="132" y="92" width="432.6" height="18" rx="4" fill="#afb8c1"/>
+<text x="572.6" y="105" font-size="13" fill="#656d76">12.3 MB</text>
+<rect x="132" y="116" width="376.8" height="18" rx="4" fill="#1a7f37"/>
+<text x="516.8" y="129" font-size="13" font-weight="600" fill="#1f2328">10.7 MB  <tspan fill="#1a7f37">−13%</tspan></text>
 <text x="24" y="174" font-size="14" font-weight="600" fill="#1f2328">armeabi-v7a</text>
-<rect x="132" y="152" width="455.9" height="18" rx="4" fill="#afb8c1"/>
-<text x="595.9" y="165" font-size="13" fill="#656d76">12.9 MB</text>
+<rect x="132" y="152" width="455.1" height="18" rx="4" fill="#afb8c1"/>
+<text x="595.1" y="165" font-size="13" fill="#656d76">13.0 MB</text>
 <rect x="132" y="176" width="401.3" height="18" rx="4" fill="#1a7f37"/>
-<text x="541.3" y="189" font-size="13" font-weight="600" fill="#1f2328">11.3 MB  <tspan fill="#1a7f37">−12%</tspan></text>
+<text x="541.3" y="189" font-size="13" font-weight="600" fill="#1f2328">11.4 MB  <tspan fill="#1a7f37">−12%</tspan></text>
 <text x="24" y="234" font-size="14" font-weight="600" fill="#1f2328">x86_64</text>
 <rect x="132" y="212" width="470.0" height="18" rx="4" fill="#afb8c1"/>
-<text x="610.0" y="225" font-size="13" fill="#656d76">13.3 MB</text>
-<rect x="132" y="236" width="410.7" height="18" rx="4" fill="#1a7f37"/>
-<text x="550.7" y="249" font-size="13" font-weight="600" fill="#1f2328">11.6 MB  <tspan fill="#1a7f37">−13%</tspan></text>
+<text x="610.0" y="225" font-size="13" fill="#656d76">13.4 MB</text>
+<rect x="132" y="236" width="410.0" height="18" rx="4" fill="#1a7f37"/>
+<text x="550.0" y="249" font-size="13" font-weight="600" fill="#1f2328">11.7 MB  <tspan fill="#1a7f37">−13%</tspan></text>
 <rect x="24" y="276" width="12" height="12" rx="3" fill="#afb8c1"/><text x="42" y="287" font-size="13" fill="#656d76">upstream</text>
 <rect x="124" y="276" width="12" height="12" rx="3" fill="#1a7f37"/><text x="142" y="287" font-size="13" fill="#656d76">slim</text>
 </svg>
