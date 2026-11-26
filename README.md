@@ -47,12 +47,12 @@ dependencyResolutionManagement {
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("io.github.dec0iiyy:libv2ray:26.11.9-slim@aar")
+    implementation("io.github.dec0iiyy:libv2ray:26.11.26-slim@aar")
 }
 ```
 <!-- /release:gradle -->
 
-Prefer a file? Download <!-- release:file -->`libv2ray-26.11.9-slim.aar`<!-- /release:file --> from the [releases](https://github.com/dec0iiyy/AndroidLibXrayLite-slim/releases) page. `SHA256SUMS` is attached to every release, and the keep rules ship inside the AAR (`-keep class go.** { *; }`, `-keep class libv2ray.** { *; }`).
+Prefer a file? Download <!-- release:file -->`libv2ray-26.11.26-slim.aar`<!-- /release:file --> from the [releases](https://github.com/dec0iiyy/AndroidLibXrayLite-slim/releases) page. `SHA256SUMS` is attached to every release, and the keep rules ship inside the AAR (`-keep class go.** { *; }`, `-keep class libv2ray.** { *; }`).
 
 ## Sizes
 
@@ -64,15 +64,15 @@ Prefer a file? Download <!-- release:file -->`libv2ray-26.11.9-slim.aar`<!-- /re
 </p>
 
 <!-- release:sizes -->
-`libgojni.so` per ABI, upstream `v26.11.9` against `26.11.9-slim`. "Compressed" is the deflated size of the file inside the AAR, which is roughly what an APK download carries.
+`libgojni.so` per ABI, upstream `v26.11.26` against `26.11.26-slim`. "Compressed" is the deflated size of the file inside the AAR, which is roughly what an APK download carries.
 
 | ABI | upstream | slim | upstream, compressed | slim, compressed |
 |---|---|---|---|---|
-| arm64-v8a | 33.8 MB | 27.5 MB | 12.3 MB | 10.7 MB |
-| armeabi-v7a | 33.1 MB | 28.7 MB | 13.0 MB | 11.4 MB |
-| x86_64 | 36.2 MB | 29.6 MB | 13.4 MB | 11.7 MB |
+| arm64-v8a | 33.9 MB | 27.5 MB | 12.3 MB | 10.8 MB |
+| armeabi-v7a | 33.1 MB | 28.7 MB | 12.9 MB | 11.4 MB |
+| x86_64 | 36.2 MB | 29.7 MB | 13.4 MB | 11.7 MB |
 
-The AAR files are 60.4 MB (upstream) and 33.9 MB (slim), but that is not a like-for-like comparison. The upstream AAR also contains an x86 library (13.9 MB compressed) and `geoip.dat` / `geosite.dat` (28.0 MB, 7.9 MB compressed). **The slim AAR contains neither**: ship your own geo files if your config uses them.
+The AAR files are 60.5 MB (upstream) and 33.9 MB (slim), but that is not a like-for-like comparison. The upstream AAR also contains an x86 library (13.8 MB compressed) and `geoip.dat` / `geosite.dat` (28.2 MB, 8.0 MB compressed). **The slim AAR contains neither**: ship your own geo files if your config uses them.
 <!-- /release:sizes -->
 
 These numbers belong to one release. The notes of every release give the exact size of the arm64-v8a library and the change since the previous release.
@@ -121,9 +121,9 @@ Add it to `gradle/verification-metadata.xml` (`./gradlew --write-verification-me
 
 <!-- release:verification -->
 ```xml
-<component group="io.github.dec0iiyy" name="libv2ray" version="26.11.9-slim">
-   <artifact name="libv2ray-26.11.9-slim.aar">
-      <sha256 value="bac874a5cadcbda0cbfa877360aa4ea355dc847d16cf9b8d2515baaa5619cc47" origin="GitHub release"/>
+<component group="io.github.dec0iiyy" name="libv2ray" version="26.11.26-slim">
+   <artifact name="libv2ray-26.11.26-slim.aar">
+      <sha256 value="7310bd07d60b1d4572e8c5e124841c5f6c8f7eae0759be9f2ac41e9c58801c3c" origin="GitHub release"/>
    </artifact>
 </component>
 ```
@@ -148,7 +148,7 @@ flowchart LR
 - **Automatic.** The `update` workflow runs daily, looks at the latest AndroidLibXrayLite release and, if there is no matching `-slim` release here, starts the `build` workflow. It builds, runs the tests, attests and publishes the release with checksums, licenses and a size report, then updates the numbers and the chart in this README, and opens an issue if something fails. GitHub can start scheduled runs hours late.
 - **Canary.** The `canary` workflow runs every Monday and builds the latest wrapper against Xray-core `main` without publishing. If it fails, an issue appears before the next Xray release does, saying that `slim/` needs a change.
 - **On demand.** Actions → `build` → Run workflow. `tag` is an AndroidLibXrayLite tag. `xray` is optional: an Xray-core tag, branch or commit (for example `v26.10.1` or `main`) to build into that wrapper before the wrapper itself is updated. Untick `publish` for a dry run that only uploads the files as a workflow artifact.
-- **Locally.** <!-- release:local -->`./build-aar.sh v26.11.9` or `./build-aar.sh v26.11.9 main`<!-- /release:local -->.
+- **Locally.** <!-- release:local -->`./build-aar.sh v26.11.26` or `./build-aar.sh v26.11.26 main`<!-- /release:local -->.
 
 The toolchain is pinned in `versions.env` (Go and NDK), so a new release does not change because a runner image did. If an upstream release needs a newer Go, the build stops with a message that says so; raise `GO_VERSION` in a commit and run it again.
 
@@ -173,7 +173,7 @@ You need git, Go and an Android NDK in the versions pinned in `versions.env` (ot
 
 <!-- release:build -->
 ```sh
-ANDROID_NDK_HOME=$ANDROID_HOME/ndk/30.0.16248370 ./build-aar.sh v26.11.9
+ANDROID_NDK_HOME=$ANDROID_HOME/ndk/30.0.16248370 ./build-aar.sh v26.11.26
 ```
 <!-- /release:build -->
 
