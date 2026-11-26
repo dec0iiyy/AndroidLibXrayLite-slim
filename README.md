@@ -155,9 +155,10 @@ The toolchain is pinned in `versions.env` (Go and NDK), so a new release does no
 <details>
 <summary>Why this keeps working when Xray moves things around</summary>
 
-- The patch is data, not code: `slim/hollow.txt` lists the packages whose implementation is hidden, `slim/forbidden.txt` lists what must never be linked, `slim/distro_all.go.txt` replaces Xray's `main/distro/all`.
+- The patch is data, not code: `slim/hollow.txt` lists the packages whose implementation is hidden, `slim/forbidden.txt` lists what must never be linked, `slim/excluded.txt` lists the imports dropped from Xray's `main/distro/all`.
+- `main/distro/all` is rebuilt from the upstream file on every build, minus `excluded.txt`. When Xray adds, renames or merges a feature (after 26.11.9 Blackhole was merged into Freedom and `app/reverse` was removed), the slim build follows by itself instead of failing to compile or, worse, starting without a feature that configs still use.
 - `slim/main.go` applies it to a copy of the module and then compiles. Whenever the remaining code still needs a symbol from a hidden file, it restores that file by itself, so no keep-list is maintained by hand.
-- The build stops with a clear message instead of publishing a bad AAR when: a forbidden package is linked again (the message names the importer to add to `hollow.txt`), `verify/` fails (it also checks that WireGuard really is gone), or the arm64 library grows over the size budget (`MAX_ARM64_BYTES`, 30 MB).
+- The build stops with a clear message instead of publishing a bad AAR when: a forbidden package is linked again (the message names the importer to add to `hollow.txt`), `verify/` fails (it also checks that WireGuard really is gone), a config fixture does not start on the full upstream build or on the slim one, or the arm64 library grows over the size budget (`MAX_ARM64_BYTES`, 30 MB).
 - Every release note lists the largest packages in the arm64 library and the change in size since the previous release (`tools/sizes`), so a new heavy dependency shows up in review instead of in your APK.
 - The numbers in this README and the size chart are generated from the published AARs by `tools/readme`, so they cannot drift from the release.
 
@@ -165,7 +166,11 @@ The toolchain is pinned in `versions.env` (Go and NDK), so a new release does no
 
 ## Tested
 
-`verify/main.go` starts a client and a server instance in one process and sends HTTP requests through SOCKS5: VLESS over ws, gRPC, XHTTP and HTTPUpgrade with TLS (uTLS fingerprint, pinned certificate), VMess, Trojan, Shadowsocks AEAD and 2022, SOCKS, HTTP and Hysteria2 with salamander. REALITY is only checked by parsing a config (it needs a real destination server). This is not a replacement for testing on a device.
+`verify/main.go` starts a client and a server instance in one process and sends HTTP requests through SOCKS5: VLESS over ws, gRPC, XHTTP and HTTPUpgrade with TLS (uTLS fingerprint, pinned certificate), VMess, Trojan, Shadowsocks AEAD and 2022, SOCKS, HTTP and Hysteria2 with salamander. REALITY is only checked by parsing a config (it needs a real destination server).
+
+The fixtures in [`verify/configs/`](verify/configs) are complete client configs: mixed, SOCKS and HTTP inbounds, VLESS REALITY Vision, WS+TLS and gRPC with `mux`, balancers over `observatory` and `burstObservatory`, Blackhole and loopback outbounds, DNS and `geosite:` / `geoip:` routing. Each one is loaded and started twice: on the unpatched upstream build first, then on the slim build. A failure in the first run means that Xray-core itself changed a config format, a failure in the second one means that slim cut something a config needs. Either way nothing is published. Add the shape of your own configs there.
+
+This is not a replacement for testing on a device.
 
 ## Build it yourself
 

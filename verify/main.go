@@ -12,6 +12,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
+	"flag"
 	"fmt"
 	"io"
 	"math/big"
@@ -215,22 +216,40 @@ func realityParses() error {
 }
 
 func main() {
+	configsOnly := flag.Bool("configs-only", false, "only load the config fixtures; used on the unpatched upstream build")
+	flag.Parse()
 	fmt.Println("xray-core", core.Version())
+
+	failed := 0
+	report := func(name string, err error) {
+		if err != nil {
+			failed++
+			fmt.Printf("%-34s FAIL %v\n", name, err)
+			return
+		}
+		fmt.Printf("%-34s OK\n", name)
+	}
+	stage := "slim"
+	if *configsOnly {
+		stage = "upstream"
+	}
+	if err := checkFixtures(stage, report); err != nil {
+		report(stage+":config", err)
+	}
+	if *configsOnly {
+		if failed > 0 {
+			fmt.Println("upstream Xray-core itself rejects a config fixture or ignores part of it: this is an upstream change that the app's configs have to follow, not a slim problem")
+			os.Exit(1)
+		}
+		return
+	}
+
 	certLines, keyLines, pin := selfSigned()
 	listener, _ := net.Listen("tcp", "127.0.0.1:0")
 	go http.Serve(listener, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.Write([]byte("pong")) }))
 	target := fmt.Sprintf("http://%s/", listener.Addr().String())
 	allowLoopback := obj{"protocol": "freedom", "settings": obj{"finalRules": []obj{{"action": "allow"}}}}
 
-	failed := 0
-	report := func(name string, err error) {
-		if err != nil {
-			failed++
-			fmt.Printf("%-26s FAIL %v\n", name, err)
-			return
-		}
-		fmt.Printf("%-26s OK\n", name)
-	}
 	report("slim_patch_applied", slimTookEffect())
 	report("vless_reality_parse", realityParses())
 	for _, s := range scenarios(certLines, keyLines, pin) {
