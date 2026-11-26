@@ -1,0 +1,60 @@
+{
+  "remarks": "VLESS REALITY Vision, balancer over burstObservatory",
+  "log": {"loglevel": "warning"},
+  "dns": {
+    "servers": [
+      "https+local://1.1.1.1/dns-query",
+      {"address": "77.88.8.8", "domains": ["geosite:category-ru"], "expectIPs": ["geoip:ru"]},
+      "localhost"
+    ],
+    "queryStrategy": "UseIPv4"
+  },
+  "inbounds": [
+    {"tag": "mixed-in", "protocol": "mixed", "listen": "127.0.0.1", "port": 10808,
+     "settings": {"auth": "noauth", "udp": true},
+     "sniffing": {"enabled": true, "destOverride": ["http", "tls", "quic"], "routeOnly": true}},
+    {"tag": "http-in", "protocol": "http", "listen": "127.0.0.1", "port": 10809, "settings": {}},
+    {"tag": "loop-in", "protocol": "dokodemo-door", "listen": "127.0.0.1", "port": 10810,
+     "settings": {"address": "127.0.0.1", "port": 53, "network": "tcp,udp"}}
+  ],
+  "outbounds": [
+    {"tag": "proxy", "protocol": "vless",
+     "settings": {"vnext": [{"address": "198.51.100.10", "port": 443,
+       "users": [{"id": "b831381d-6324-4d53-ad4f-8cda48b30811", "encryption": "none", "flow": "xtls-rprx-vision"}]}]},
+     "streamSettings": {"network": "tcp", "security": "reality",
+       "realitySettings": {"serverName": "www.example.com", "fingerprint": "chrome",
+         "publicKey": "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY", "shortId": "6ba85179e30d4fc2", "spiderX": "/"}}},
+    {"tag": "proxy-2", "protocol": "vless",
+     "settings": {"vnext": [{"address": "198.51.100.11", "port": 443,
+       "users": [{"id": "b831381d-6324-4d53-ad4f-8cda48b30811", "encryption": "none", "flow": "xtls-rprx-vision"}]}]},
+     "streamSettings": {"network": "tcp", "security": "reality",
+       "realitySettings": {"serverName": "www.example.com", "fingerprint": "chrome",
+         "publicKey": "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY", "shortId": "6ba85179e30d4fc2"}}},
+    {"tag": "wl-01", "protocol": "socks",
+     "settings": {"servers": [{"address": "198.51.100.20", "port": 1080, "users": [{"user": "user", "pass": "pass"}]}]},
+     "mux": {"enabled": true, "concurrency": 8}},
+    {"tag": "direct", "protocol": "freedom", "settings": {"domainStrategy": "UseIPv4"}},
+    {"tag": "block", "protocol": "blackhole", "settings": {"response": {"type": "http"}}},
+    {"tag": "loop", "protocol": "loopback", "settings": {"inboundTag": "loop-in"}}
+  ],
+  "burstObservatory": {
+    "subjectSelector": ["proxy"],
+    "pingConfig": {"destination": "https://www.gstatic.com/generate_204", "connectivity": "", "interval": "1m", "sampling": 3, "timeout": "5s"}
+  },
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "balancers": [
+      {"tag": "PROXY-BAL", "selector": ["proxy"], "strategy": {"type": "leastLoad", "settings": {"expected": 1, "maxRTT": "1s"}}, "fallbackTag": "proxy"}
+    ],
+    "rules": [
+      {"inboundTag": ["loop-in"], "outboundTag": "direct"},
+      {"protocol": ["bittorrent"], "outboundTag": "direct"},
+      {"domain": ["geosite:category-ads-all"], "outboundTag": "block"},
+      {"ip": ["geoip:private"], "outboundTag": "direct"},
+      {"domain": ["geosite:category-ru", "domain:ru", "full:example.org", "regexp:\\.example\\.net$"], "outboundTag": "direct"},
+      {"ip": ["geoip:ru"], "outboundTag": "direct"},
+      {"domain": ["keyword:whitelist"], "outboundTag": "wl-01"},
+      {"network": "tcp,udp", "balancerTag": "PROXY-BAL"}
+    ]
+  }
+}

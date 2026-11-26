@@ -1,0 +1,12 @@
+app/commander
+*/command
+app/metrics
+main/commands/all
+main/confloader/external
+main/toml
+main/yaml
+proxy/masque
+proxy/wireguard
+transport/internet/kcp
+transport/internet/masque
+transport/internet/xdrive

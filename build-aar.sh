@@ -62,11 +62,17 @@ GOBIN=$WORK/bin "$GO" install "golang.org/x/mobile/cmd/gomobile@$GOMOBILE" "gola
 PATH=$WORK/bin:$PATH
 gomobile init
 
+rm -rf "$SRC/verify"
+cp -R "$HERE/verify" "$SRC/verify"
+GOFLAGS="$GOFLAGS -mod=mod" "$GO" run -tags "$GO_TAGS" ./verify -configs-only
+
 "$GO" run "$HERE/slim/main.go" -src "$SRC" -config "$HERE/slim" -xray "$WORK/xray-core" -tags "$GO_TAGS"
 
-mkdir -p "$SRC/verify"
-cp "$HERE/verify/main.go" "$SRC/verify/main.go"
-GOFLAGS="$GOFLAGS -mod=mod" "$GO" run ./verify | tee "$WORK/verify.log"
+# No pipe into tee here: sh has no pipefail, so a failing verify would pass.
+VERIFY_STATUS=0
+GOFLAGS="$GOFLAGS -mod=mod" "$GO" run -tags "$GO_TAGS" ./verify > "$WORK/verify.log" 2>&1 || VERIFY_STATUS=$?
+cat "$WORK/verify.log"
+[ "$VERIFY_STATUS" -eq 0 ] || { printf 'libv2ray: verify failed, nothing is published\n' >&2; exit 1; }
 XRAY_RELEASE=$(sed -n 's/^xray-core //p' "$WORK/verify.log")
 
 gomobile bind -target="$TARGETS" -androidapi 24 -trimpath -tags "$GO_TAGS" -ldflags="$LDFLAGS" -o "$WORK/libv2ray.aar" ./

@@ -1,0 +1,45 @@
+{
+  "remarks": "VLESS WS+TLS with mux, VMess and Trojan fallbacks, leastPing over observatory",
+  "log": {"loglevel": "warning"},
+  "dns": {"servers": ["8.8.8.8", "1.1.1.1"]},
+  "inbounds": [
+    {"tag": "socks-in", "protocol": "socks", "listen": "127.0.0.1", "port": 10808,
+     "settings": {"auth": "password", "accounts": [{"user": "user", "pass": "pass"}], "udp": true},
+     "sniffing": {"enabled": true, "destOverride": ["http", "tls"]}},
+    {"tag": "http-in", "protocol": "http", "listen": "127.0.0.1", "port": 10809, "settings": {}}
+  ],
+  "outbounds": [
+    {"tag": "proxy", "protocol": "vless",
+     "settings": {"vnext": [{"address": "relay.example.com", "port": 443,
+       "users": [{"id": "b831381d-6324-4d53-ad4f-8cda48b30811", "encryption": "none"}]}]},
+     "streamSettings": {"network": "ws", "security": "tls",
+       "tlsSettings": {"serverName": "relay.example.com", "fingerprint": "chrome", "alpn": ["http/1.1"], "enableSessionResumption": true},
+       "wsSettings": {"path": "/ws", "host": "relay.example.com"},
+       "sockopt": {"tcpFastOpen": true, "domainStrategy": "UseIPv4"}},
+     "mux": {"enabled": true, "concurrency": 16, "xudpConcurrency": 16, "xudpProxyUDP443": "reject"}},
+    {"tag": "proxy-vmess", "protocol": "vmess",
+     "settings": {"vnext": [{"address": "198.51.100.30", "port": 443,
+       "users": [{"id": "b831381d-6324-4d53-ad4f-8cda48b30811", "security": "auto"}]}]},
+     "streamSettings": {"network": "grpc", "security": "tls",
+       "tlsSettings": {"serverName": "grpc.example.com", "fingerprint": "firefox"},
+       "grpcSettings": {"serviceName": "svc", "multiMode": true}}},
+    {"tag": "proxy-trojan", "protocol": "trojan",
+     "settings": {"servers": [{"address": "198.51.100.31", "port": 443, "password": "secret"}]},
+     "streamSettings": {"network": "httpupgrade", "security": "tls",
+       "tlsSettings": {"serverName": "hu.example.com"},
+       "httpupgradeSettings": {"path": "/hu", "host": "hu.example.com"}},
+     "mux": {"enabled": true, "concurrency": 16}},
+    {"tag": "direct", "protocol": "freedom", "settings": {"domainStrategy": "AsIs"}},
+    {"tag": "block", "protocol": "blackhole", "settings": {}}
+  ],
+  "observatory": {"subjectSelector": ["proxy"], "probeURL": "https://www.gstatic.com/generate_204", "probeInterval": "1m"},
+  "routing": {
+    "domainStrategy": "AsIs",
+    "balancers": [{"tag": "BAL", "selector": ["proxy"], "strategy": {"type": "leastPing"}, "fallbackTag": "proxy-vmess"}],
+    "rules": [
+      {"type": "field", "ip": ["geoip:private"], "outboundTag": "direct"},
+      {"type": "field", "port": "53", "network": "udp", "outboundTag": "direct"},
+      {"type": "field", "inboundTag": ["socks-in", "http-in"], "balancerTag": "BAL"}
+    ]
+  }
+}
